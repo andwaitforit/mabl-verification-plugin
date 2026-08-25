@@ -6,6 +6,16 @@ This project uses semantic versioning independently of aidlc-workflows.
 ## [Unreleased]
 
 ### Added
+- Host projections for all seven harnesses under
+  `dist/plugins/mabl-verification/`, built by `scripts/build-projections.ts`,
+  with a `--check` drift guard wired into CI.
+- Root `.claude-plugin/marketplace.json` so the repository can be added as a
+  plugin marketplace.
+- GitHub Actions CI: typecheck, tests, and projection-drift check against a
+  pinned aidlc-workflows checkout.
+- Real composition tests (`tests/compose.test.ts`) that build the actual
+  projection, run the emitted compose hook, and assert all three stages reach
+  the compiled graph.
 - `tools/mabl-verification-contract.ts` — the single machine-readable contract
   (failure-class enum, owned-artifact map, dispatcher flag parsing, fail-closed
   JSON extraction) shared by every producer and consumer.

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  AIDLC_PINNED_SHA: 572dda2863437d578b9d9bc2ea171a2e3955f91f
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Check out aidlc-workflows at the pinned commit
+        run: |
+          git clone --filter=blob:none https://github.com/awslabs/aidlc-workflows.git ../aidlc-workflows
+          git -C ../aidlc-workflows checkout "$AIDLC_PINNED_SHA"
+          bun install --cwd ../aidlc-workflows
+
+      - name: Install
+        run: bun install
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun test
+        env:
+          AIDLC_WORKFLOWS_ROOT: ${{ github.workspace }}/../aidlc-workflows
+
+      - name: Projection drift
+        run: bun scripts/build-projections.ts --check
+        env:
+          AIDLC_WORKFLOWS_ROOT: ${{ github.workspace }}/../aidlc-workflows

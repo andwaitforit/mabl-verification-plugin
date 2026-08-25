@@ -1,0 +1,13 @@
+{
+  "name": "mabl-plugins",
+  "owner": { "name": "mabl" },
+  "description": "mabl's AIDLC plugin catalogue. A marketplace indexes plugins for discovery; it is not in the trust path.",
+  "plugins": [
+    {
+      "name": "aidlc-mabl-verification",
+      "description": "End-to-end mabl verification loop — pre-PR test matching and local execution, failure RCA, coverage gap analysis, triage routing, and ship gating.",
+      "source": "./dist/plugins/mabl-verification/claude",
+      "version": "1.0.0"
+    }
+  ]
+}
