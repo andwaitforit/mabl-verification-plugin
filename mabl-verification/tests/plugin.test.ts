@@ -91,6 +91,53 @@ describe("contract", () => {
     expect(prePr).not.toContain('"testId"');
     expect(prePr).not.toContain('"failingStep"');
   });
+
+  test("consumers name only canonical classes", () => {
+    // The ship gate reads what pre-pr writes; a prose-only label here is how a
+    // real regression slipped past BLOCK before.
+    const shipGate = readFileSync(
+      join(PLUGIN_ROOT, "stages", "operation", "mabl-verification-ship-gate.md"),
+      "utf-8",
+    );
+    for (const bad of ["code regression / stale-test", "/ flake /"]) {
+      expect(shipGate).not.toContain(bad);
+    }
+    for (const cls of FAILURE_CLASSES) {
+      expect(shipGate).toContain(cls);
+    }
+  });
+
+  test("artifact json keys are snake_case across every producer", () => {
+    // MCP call signatures keep mabl's own camelCase spelling; only keys inside
+    // fenced json blocks this plugin writes are checked.
+    const docs = [
+      join(PLUGIN_ROOT, "stages", "construction", "mabl-verification-pre-pr.md"),
+      join(PLUGIN_ROOT, "stages", "construction", "mabl-verification-coverage-gap.md"),
+      join(PLUGIN_ROOT, "stages", "operation", "mabl-verification-ship-gate.md"),
+      join(PLUGIN_ROOT, "knowledge", "mabl-verification-agent", "triage-routing.md"),
+    ];
+    const camel = /"[a-z]+[A-Z][A-Za-z]*"\s*:/g;
+    for (const doc of docs) {
+      const body = readFileSync(doc, "utf-8");
+      for (const block of body.match(/```json\s*\n[\s\S]*?\n```/g) ?? []) {
+        expect({ doc, offenders: block.match(camel) ?? [] }).toEqual({
+          doc,
+          offenders: [],
+        });
+      }
+    }
+  });
+
+  test("the ship gate documents every identifier kind it accepts", () => {
+    const shipGate = readFileSync(
+      join(PLUGIN_ROOT, "stages", "operation", "mabl-verification-ship-gate.md"),
+      "utf-8",
+    );
+    expect(shipGate).toContain("## Input contract");
+    for (const suffix of ["-jr", "-pr", "-j", "-p", "-v"]) {
+      expect(shipGate).toContain(`\`${suffix}\``);
+    }
+  });
 });
 
 describe("mabl-run-status sensor", () => {
@@ -291,4 +338,32 @@ describe("stage contracts", () => {
       }
     });
   }
+});
+
+describe("release metadata", () => {
+  const repoRoot = join(PLUGIN_ROOT, "..");
+  const read = (...parts: string[]) =>
+    JSON.parse(readFileSync(join(repoRoot, ...parts), "utf-8"));
+
+  test("version is synchronized across every manifest", () => {
+    const pluginVersion = read("mabl-verification", ".aidlc-plugin", "plugin.json").version;
+    const packageVersion = read("package.json").version;
+    const marketplace = read(".claude-plugin", "marketplace.json");
+    const entry = marketplace.plugins.find(
+      (p: { name: string }) => p.name === "aidlc-mabl-verification",
+    );
+
+    expect(pluginVersion).toBe(packageVersion);
+    expect(entry?.version).toBe(pluginVersion);
+  });
+
+  test("the changelog records the released version", () => {
+    const version = read("mabl-verification", ".aidlc-plugin", "plugin.json").version;
+    const changelog = readFileSync(join(repoRoot, "CHANGELOG.md"), "utf-8");
+    // Either the version has its own released section, or work is staged
+    // under Unreleased awaiting a release decision.
+    const released = changelog.includes(`## [${version}]`);
+    const staged = changelog.includes("## [Unreleased]");
+    expect(released || staged).toBe(true);
+  });
 });

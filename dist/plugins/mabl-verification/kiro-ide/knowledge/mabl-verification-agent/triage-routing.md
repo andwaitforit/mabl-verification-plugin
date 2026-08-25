@@ -5,7 +5,7 @@ failure is classified. Enforces loop bounds and human gates.
 
 ## Routing Table
 
-| `class` | `action` | `autoApply` | `requiresHumanGate` | Next Step |
+| `class` | `action` | `auto_apply` | `requires_human_gate` | Next Step |
 |---------|----------|-------------|---------------------|-----------|
 | `product` | `propose-code-fix` | **false** | **true** | Present the diff; on approval apply → re-run |
 | `stale-test` | `edit-test` | true | false | Edit selector/assertion → promote to master → re-run |
@@ -14,7 +14,7 @@ failure is classified. Enforces loop bounds and human gates.
 
 ## Inviolable Rules
 
-1. **Never auto-apply a product-code change.** Always `autoApply: false` +
+1. **Never auto-apply a product-code change.** Always `auto_apply: false` +
    `requiresHumanGate: true`, even at high confidence. Product logic is the user's
    to approve.
 
@@ -82,19 +82,19 @@ failure is classified. Enforces loop bounds and human gates.
 
 ## Decision Output
 
-Emit one `routerDecision` per input verdict:
+Emit one `router_decision` per input verdict:
 
 ```json
 {
-  "testId": "...",
-  "testRunId": "...",
+  "test_id": "...",
+  "test_run_id": "...",
   "class": "stale-test",
   "action": "edit-test",
-  "autoApply": true,
-  "requiresHumanGate": false,
+  "auto_apply": true,
+  "requires_human_gate": false,
   "iteration": 1,
-  "maxIterations": 3,
+  "max_iterations": 3,
   "confidence": 0.85,
-  "nextStep": "Edit selector [data-testid='dashboard-header'] → promote → re-run"
+  "next_step": "Edit selector [data-testid='dashboard-header'] → promote → re-run"
 }
 ```

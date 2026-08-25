@@ -11,10 +11,11 @@ source code.
 
 ### 1. Resolve to a Concrete Failed Test Run
 
-End state: a single failed `testRunId` (`-jr`) in a known workspace.
+End state: a single failed test run id (suffix `-jr`) in a known workspace.
+See the ship-gate stage's input contract for the full identifier-kind table.
 
 - Given a `-jr` → use directly
-- Given a test id (`-j`) → `list_mabl_test_runs(testId)`, pick most recent `failed`
+- Given a test id (suffix `-j`) → `list_mabl_test_runs(testId)`, pick most recent `failed`
 - Given a plan run (`-pr`) → `get_mabl_plan_run(planRunId)`, list failed test runs
 - Given a mabl URL → extract the run id
 

@@ -16,6 +16,11 @@ This project uses semantic versioning independently of aidlc-workflows.
 - Real composition tests (`tests/compose.test.ts`) that build the actual
   projection, run the emitted compose hook, and assert all three stages reach
   the compiled graph.
+- An input contract on `mabl-verification-ship-gate` naming every mabl
+  identifier kind the stage accepts, replacing bare `-jr`/`-pr`/`-j`/`-p`/`-v`
+  shorthand carried over from the source skills.
+- Version-synchronization tests across `plugin.json`, `package.json`, and the
+  marketplace entry.
 - `tools/mabl-verification-contract.ts` — the single machine-readable contract
   (failure-class enum, owned-artifact map, dispatcher flag parsing, fail-closed
   JSON extraction) shared by every producer and consumer.
@@ -36,6 +41,11 @@ This project uses semantic versioning independently of aidlc-workflows.
   nonexistent stage slugs.
 - Docs incorrectly claimed blocking sensor severity does not exist.
 - `required_sections: ["mabl Verification"]` was declared but never emitted.
+- Contract drift the first pass missed: the ship gate still described failure
+  classes in prose ("code regression / ... / flake") rather than the canonical
+  tokens, and the triage-routing decision object used camelCase keys. Both are
+  now guarded by tests that scan every fenced JSON block this plugin writes.
+  MCP call signatures keep mabl's own camelCase spelling.
 
 ### Changed
 - `mabl-run-status` is now `default_severity: blocking`;

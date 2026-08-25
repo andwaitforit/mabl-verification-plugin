@@ -52,22 +52,53 @@ apply ship policy → emit verdict.**
 
 Load mabl-verification-agent persona from `agents/mabl-verification-agent.md` and knowledge from `{{HARNESS_DIR}}/knowledge/mabl-verification-agent/`.
 
+## Input contract
+
+This stage accepts two kinds of input.
+
+**Upstream artifacts** (the normal path) — produced by earlier stages on the
+resolved plan:
+
+| Artifact | Producer | Required |
+|---|---|---|
+| `mabl-verification-run-results` | `mabl-verification-pre-pr` | yes |
+| `mabl-verification-coverage-report` | `mabl-verification-coverage-gap` | no |
+
+**mabl entity identifiers** (the standalone path) — supplied by the user when
+this stage is invoked without an upstream run. Every mabl id carries a suffix
+naming its entity kind; match on the suffix rather than asking the user which
+kind they pasted:
+
+| Kind | Suffix | Resolve with |
+|---|---|---|
+| Test run | `-jr` | `get_mabl_test_run(testRunId)` |
+| Plan run | `-pr` | `get_mabl_plan_run(planRunId)` |
+| Test | `-j` | `list_mabl_test_runs(testId, workspaceId)` |
+| Plan | `-p` | `get_mabl_plan(planId)` |
+| Deployment event | `-v` | `get_mabl_deployment(deploymentId)` |
+
+An identifier whose suffix is not in this table is not a mabl entity id — ask
+rather than guessing. The MCP parameter names above are mabl's own API spelling
+and stay camelCase; keys in artifacts this plugin writes are snake_case.
+
 ### Step 2: Collect the Run Signal
 
 Assemble the quality evidence from upstream stages:
 
 1. **Run results** — read `mabl-verification-run-results` from `mabl-verification-pre-pr`.
-   Extract per-test: pass/fail, failing step, classification (code regression / stale-test /
-   env-data / flake / billable-skip), confidence, testRunId.
+   Extract per-test: pass/fail, failing step, `class` (one of `product`,
+   `stale-test`, `env-data`, `mabl-flake`, `billable-skip` — see the input
+   contract below), `confidence`, and `test_run_id`.
 
 2. **Coverage report** — read `mabl-verification-coverage-report` from
    `mabl-verification-coverage-gap` (if the stage ran). Extract: gap count, severity
    distribution, ship-blocker flag.
 
-3. **Direct references** — if the user provided a specific test run (`-jr`), plan run
-   (`-pr`), or the stage is invoked standalone, resolve the signal via MCP:
-   - `-jr` → `get_mabl_test_run(testRunId)` for status + failure summary
-   - `-pr` → `get_mabl_plan_run(planRunId)` for all test statuses
+3. **Direct references** — when this stage runs standalone, or the user names a
+   specific mabl entity, resolve the signal via MCP using the identifier kinds in
+   the input contract below:
+   - a **test run id** → `get_mabl_test_run(testRunId)` for status + failure summary
+   - a **plan run id** → `get_mabl_plan_run(planRunId)` for all test statuses
 
 ### Step 3: Analyze Unanalyzed Failures
 
@@ -85,9 +116,9 @@ Skip runs already analyzed by the pre-pr stage this session.
 ### Step 4: Check Release Readiness
 
 Call `check_release_readiness` (MCP) with the entity IDs from the run signal:
-- Test ids (`-j`) from the matched set
-- Plan id (`-p`) if a plan was triggered
-- Deployment event id (`-v`) if this is post-deploy
+- **Test ids** from the matched set
+- **Plan id** if a plan was triggered
+- **Deployment event id** if this is post-deploy
 
 Capture:
 - The readiness **recommendation** (pass / at_risk / blocked)
