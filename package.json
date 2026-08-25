@@ -1,0 +1,15 @@
+{
+  "name": "mabl-verification-plugin",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Dev-only tooling for the mabl-verification AIDLC plugin. The published artifact is the packaged projection, not this package.",
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "bun-types": "^1.3.13",
+    "typescript": "^5.6.0"
+  }
+}
