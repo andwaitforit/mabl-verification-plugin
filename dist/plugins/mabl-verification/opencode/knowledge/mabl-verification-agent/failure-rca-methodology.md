@@ -16,7 +16,7 @@ See the ship-gate stage's input contract for the full identifier-kind table.
 
 - Given a `-jr` → use directly
 - Given a test id (suffix `-j`) → `list_mabl_test_runs(testId)`, pick most recent `failed`
-- Given a plan run (`-pr`) → `get_mabl_plan_run(planRunId)`, list failed test runs
+- Given a plan run id (suffix `-pr`) → `get_mabl_plan_run(planRunId)`, list failed test runs
 - Given a mabl URL → extract the run id
 
 ### 2. Pull mabl's AI Failure Analysis
