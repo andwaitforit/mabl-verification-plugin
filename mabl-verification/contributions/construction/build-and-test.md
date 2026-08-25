@@ -19,7 +19,9 @@ fragments:
 
 ## fragment: after-step:10
 
-### Step 10a (mabl-verification): Quick smoke-check against mabl
+## mabl Verification
+
+### Step 10a: Quick smoke-check against mabl
 
 After the build passes and unit/integration tests are green, run a quick mabl
 smoke-check to catch regressions the unit tests structurally cannot see (e.g.

@@ -175,8 +175,9 @@ artifacts, then report `--result revised` before re-presenting.
 
 This stage binds the `mabl-coverage-threshold` sensor which reads the JSON summary
 from `mabl-verification-coverage-report.md` and reports whether critical/normal gaps
-exist. A critical gap with `has_test == false` is reported as an advisory finding
-(the framework has no blocking sensor severity yet).
+exist. A critical gap with `has_test == false` is reported as an advisory finding:
+this sensor is advisory by deliberate choice, not because blocking severity is
+unavailable. The ship gate consumes `ship_blocker` and makes the BLOCK call.
 
 ---
 

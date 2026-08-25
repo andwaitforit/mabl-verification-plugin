@@ -1,6 +1,7 @@
 # mabl-verification — AIDLC testing plugin
 
-A first-party AIDLC plugin: end-to-end mabl verification loop layered onto the
+A third-party AIDLC plugin, published and maintained by mabl: an end-to-end
+mabl verification loop layered onto the
 AI-DLC workflow. Maps code changes to mabl tests, runs them locally, root-causes
 failures, identifies coverage gaps, and gates ship decisions against mabl's
 release readiness scoring.
@@ -150,8 +151,18 @@ The plugin implements a 6-question verification loop:
   reports critical/normal gap counts and ship-blocker status. Bound to
   `mabl-verification-coverage-gap`.
 
-Both are advisory (the framework has no blocking sensor severity yet). Findings
-are REPORTED, not enforced. The stage prose and ship-gate handle actual gating.
+Severity is chosen per sensor. `mabl-run-status` is **blocking**: an unresolved
+`product` or `stale-test` failure refuses the stage's approval gate, and a human
+may proceed only through the framework's documented override ("Override blocking
+sensors", which requires a human-backed answer receipt and is refused in
+autonomous mode). `mabl-coverage-threshold` is **advisory** by deliberate choice —
+a coverage gap is a judgement about what deserves a test, not a proven
+regression — and the ship gate factors its `ship_blocker` signal into the BLOCK
+recommendation.
+
+Both sensors fail closed: for an artifact this plugin owns, a missing file, an
+absent or malformed JSON summary, or an unrecognized failure class reports
+`pass: false`, never a zero-result pass.
 
 ### Machine-readable contract
 
