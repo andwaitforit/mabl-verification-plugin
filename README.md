@@ -73,10 +73,18 @@ suite. Vendor the file only to intentionally pin a modified hook.
 
 ## Status
 
-Working toward a first release. The findings from the upstream review of
+**v0.1.0** — first published release, validated against AIDLC 2.6.105.
+
+Pre-1.0: the stage contracts, artifact schemas, and sensor output shapes may
+still change between minor versions. See [CHANGELOG.md](CHANGELOG.md). The findings from the upstream review of
 [awslabs/aidlc-workflows#907](https://github.com/awslabs/aidlc-workflows/pull/907)
 are being addressed here; see CHANGELOG.md.
 
-Still open: the setup documentation in
+Known gap: the setup documentation in
 [`mabl-verification/README.md`](mabl-verification/README.md) has not been
-re-verified against the current mabl CLI and MCP integration.
+re-verified against the current mabl CLI and MCP integration. Treat those
+install steps as unconfirmed until that lands.
+
+Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) ·
+Security: [SECURITY.md](SECURITY.md) ·
+License: [MIT](LICENSE)

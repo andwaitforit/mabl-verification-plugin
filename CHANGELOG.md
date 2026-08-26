@@ -2,8 +2,9 @@
 
 All notable changes to the mabl-verification plugin are documented here.
 This project uses semantic versioning independently of aidlc-workflows.
+Each release records the AIDLC version it was validated against.
 
-## [Unreleased]
+## [0.1.0] - 2026-08-26
 
 ### Changed
 - Authored against AIDLC **2.6.105** (`3b5a1359f`), up from 2.6.80. The
@@ -69,3 +70,5 @@ This project uses semantic versioning independently of aidlc-workflows.
 - Sensor `matches` globs narrowed to the plugin's own artifacts.
 - Published from a mabl-owned repository rather than as an AIDLC first-party
   plugin.
+
+[0.1.0]: https://github.com/andwaitforit/mabl-verification-plugin/releases/tag/v0.1.0

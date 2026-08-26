@@ -1,6 +1,6 @@
 {
   "name": "mabl-verification-plugin",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "private": true,
   "description": "Dev-only tooling for the mabl-verification AIDLC plugin. The published artifact is the packaged projection, not this package.",
