@@ -85,6 +85,30 @@ Known gap: the setup documentation in
 re-verified against the current mabl CLI and MCP integration. Treat those
 install steps as unconfirmed until that lands.
 
+## Compatibility
+
+| | |
+|---|---|
+| Plugin | 0.1.0 |
+| Validated against AIDLC | 2.6.105 (`3b5a1359f`) |
+| Harnesses | Claude Code, Codex, Copilot, Cursor, Kiro, Kiro IDE, opencode |
+
+AIDLC ships frequently and its plugin contract tightens between patch releases,
+so each plugin release names the exact framework version it was validated
+against rather than a range. Newer AIDLC versions are likely to work but are not
+covered until a release says so. If you hit a mismatch,
+[open an issue](../../issues/new/choose) with both versions.
+
+Pre-1.0, only the latest release receives fixes.
+
+## Support
+
+- **Bugs and feature requests** — [open an issue](../../issues/new/choose)
+- **Security** — report privately, see [SECURITY.md](SECURITY.md). Never a
+  public issue.
+- **AIDLC framework itself** — [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows/issues)
+- **mabl platform, CLI, or MCP** — mabl support, not this repository
+
 Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) ·
 Security: [SECURITY.md](SECURITY.md) ·
 License: [MIT](LICENSE)

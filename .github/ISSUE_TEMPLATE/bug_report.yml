@@ -1,0 +1,72 @@
+name: Bug report
+description: Something in the plugin behaves incorrectly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste mabl workspace credentials, API keys, or customer
+        data. Redact test names and URLs if they are sensitive.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - mabl-verification-pre-pr (test matching / local runs)
+        - mabl-verification-coverage-gap
+        - mabl-verification-ship-gate
+        - Sensor (mabl-run-status / mabl-coverage-threshold)
+        - build-and-test or code-generation contribution
+        - Install / composition
+        - Setup documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Minimal steps. Include the relevant artifact or sensor output if you have it.
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: aidlc-version
+    attributes:
+      label: AIDLC version
+      description: From your install, or scripts/aidlc-pin.ts if building from source.
+      placeholder: "2.6.105"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: harness
+    attributes:
+      label: Harness
+      options: [Claude Code, Kiro, Kiro IDE, Codex, opencode, Copilot, Cursor, Other]
+    validations:
+      required: true
+
+  - type: input
+    id: mabl-cli
+    attributes:
+      label: mabl CLI version
+      description: Output of `mabl --version`, and whether the run was local or cloud.

@@ -13,8 +13,8 @@ Report privately through either channel:
    vulnerability** button under this repository's
    [Security tab](../../security/advisories/new). This opens a private advisory
    visible only to maintainers.
-2. **Email** — <!-- TODO(mabl): confirm the official intake address before
-   publishing. --> mabl's security intake address.
+2. **Email** — <andy.horgan@mabl.com>, the maintainer of this repository. Use
+   this if you cannot use GitHub advisories, or to reach a human directly.
 
 Please include:
 

@@ -128,9 +128,11 @@ compose time, which is how this plugin once shipped without a ship gate.
 
 ## Reporting bugs / feature requests
 
-Use GitHub issues. Before filing, check existing issues to avoid duplicates.
+[Open an issue](../../issues/new/choose) using one of the templates. Before
+filing, check existing issues to avoid duplicates.
 
-Include:
+The templates ask for the following; please fill them in, since most reports are
+version-specific:
 
 - Which stage, sensor, or tool is affected
 - Expected vs actual behavior

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/andwaitforit/mabl-verification-plugin/security/advisories/new
+    about: Report privately. Do not open a public issue for a security problem.
+  - name: AIDLC framework issue
+    url: https://github.com/awslabs/aidlc-workflows/issues
+    about: Composition, the plugin mechanism, the sensor dispatcher, or the orchestrator itself.
+  - name: mabl platform, CLI, or MCP issue
+    url: https://help.mabl.com
+    about: Problems with mabl itself rather than this plugin.
