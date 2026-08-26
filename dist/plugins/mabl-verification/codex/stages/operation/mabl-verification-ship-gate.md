@@ -6,7 +6,7 @@ plugin: mabl-verification
 phase: operation
 execution: CONDITIONAL
 condition: Execute when mabl-verification-pre-pr is on this scope's resolved plan and produced run results, to gate the ship decision on mabl release readiness.
-lead_agent: mabl-verification-agent
+lead_agent: mabl-verification-quality-agent
 support_agents: []
 mode: inline
 produces:
@@ -50,7 +50,7 @@ apply ship policy → emit verdict.**
 
 ### Step 1: Load Agent Persona
 
-Load mabl-verification-agent persona from `agents/mabl-verification-agent.md` and knowledge from `{{HARNESS_DIR}}/knowledge/mabl-verification-agent/`.
+Load mabl-verification-quality-agent persona from `agents/mabl-verification-quality-agent.md` and knowledge from `{{HARNESS_DIR}}/knowledge/mabl-verification-quality-agent/`.
 
 ## Input contract
 

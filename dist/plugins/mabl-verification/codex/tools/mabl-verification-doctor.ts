@@ -153,13 +153,13 @@ function checkAgentInstalled(): Check {
     projectDir,
     harnessDir,
     "agents",
-    "mabl-verification-agent.md"
+    "mabl-verification-quality-agent.md"
   );
 
   if (!existsSync(agentPath)) {
     return {
       pass: false,
-      label: "mabl-verification-agent not composed into harness",
+      label: "mabl-verification-quality-agent not composed into harness",
       fix: "Re-run plugin compose: aidlc plugin sync (or bun <plugin>/hooks/compose.ts)",
       severity: "advisory",
     };
@@ -167,7 +167,7 @@ function checkAgentInstalled(): Check {
 
   return {
     pass: true,
-    label: "mabl-verification-agent composed",
+    label: "mabl-verification-quality-agent composed",
   };
 }
 

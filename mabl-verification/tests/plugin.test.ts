@@ -1,12 +1,10 @@
 /**
  * Content, contract, and sensor-behavior tests for the mabl-verification plugin.
  *
- * Content validation delegates to the framework's own validatePluginContent()
- * rather than a local parser — a hand-rolled check is what let an invalid stage
- * contract ship. The sensor tests invoke the real tools the way the dispatcher
- * does: `--output-path <exact file>` and `--stage <slug>`.
- *
- * Requires an aidlc-workflows checkout (see AIDLC_WORKFLOWS_ROOT in harness.ts).
+ * Framework-contract validation lives in compose.test.ts, which drives the
+ * shipped aidlc-plugin tools. This file covers what those tools cannot know:
+ * the plugin's own machine-readable contract and its sensors' runtime behavior,
+ * invoked exactly as the dispatcher does.
  */
 
 import { describe, expect, test } from "bun:test";
@@ -16,12 +14,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { FAILURE_CLASSES } from "../tools/mabl-verification-contract.ts";
-import { PLUGIN_NAME, PLUGIN_ROOT, loadPluginKit } from "./harness.ts";
-
-const kit = await loadPluginKit();
-const validatePluginContent = kit.validatePluginContent as (
-  root: string,
-) => Array<{ code: string; file: string; message: string }>;
+import { PLUGIN_NAME, PLUGIN_ROOT } from "./harness.ts";
 
 const RUN_STATUS = join(PLUGIN_ROOT, "tools", "aidlc-sensor-mabl-run-status.ts");
 const COVERAGE = join(PLUGIN_ROOT, "tools", "aidlc-sensor-mabl-coverage-threshold.ts");
@@ -50,12 +43,6 @@ function writeArtifact(name: string, body: string): string {
 function runResults(summary: unknown): string {
   return `# Run Results\n\nProse.\n\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`;
 }
-
-describe("content", () => {
-  test("passes the framework validator with no findings", () => {
-    expect(validatePluginContent(PLUGIN_ROOT)).toEqual([]);
-  });
-});
 
 describe("contract", () => {
   const prePr = readFileSync(
@@ -114,7 +101,7 @@ describe("contract", () => {
       join(PLUGIN_ROOT, "stages", "construction", "mabl-verification-pre-pr.md"),
       join(PLUGIN_ROOT, "stages", "construction", "mabl-verification-coverage-gap.md"),
       join(PLUGIN_ROOT, "stages", "operation", "mabl-verification-ship-gate.md"),
-      join(PLUGIN_ROOT, "knowledge", "mabl-verification-agent", "triage-routing.md"),
+      join(PLUGIN_ROOT, "knowledge", "mabl-verification-quality-agent", "triage-routing.md"),
     ];
     const camel = /"[a-z]+[A-Z][A-Za-z]*"\s*:/g;
     for (const doc of docs) {

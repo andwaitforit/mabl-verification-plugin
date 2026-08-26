@@ -20,7 +20,7 @@ against the user-facing flows it touches via mabl's AI testing platform. It:
   report run-status and coverage-threshold findings;
 - **ships a doctor check** that verifies the mabl CLI, authentication, workspace,
   and composed plugin state; and
-- **ships one agent** (`mabl-verification-agent`) that leads all three stages,
+- **ships one agent** (`mabl-verification-quality-agent`) that leads all three stages,
   absorbing the methodology for test matching, failure RCA, triage routing,
   coverage analysis, and ship gating.
 
@@ -92,7 +92,7 @@ run won't reach them unless explicitly scoped.
 | `mabl-verification-coverage-gap` | construction | 3.95 | CONDITIONAL — when pre-pr reports zero-match or partial coverage | `mabl-verification-coverage-report` |
 | `mabl-verification-ship-gate` | operation | 4.50 | EXECUTE under declared scopes | `mabl-verification-ship-verdict` |
 
-All three are led by `mabl-verification-agent`, mode: inline.
+All three are led by `mabl-verification-quality-agent`, mode: inline.
 
 ## 5. Design & implementation
 
@@ -109,10 +109,10 @@ plugins/mabl-verification/
   contributions/construction/            # 1 stage modification
     build-and-test.md
   agents/                                # 1 agent persona
-    mabl-verification-agent.md
+    mabl-verification-quality-agent.md
   scopes/                                # 1 plugin scope
     mabl-verification-validation.md
-  knowledge/mabl-verification-agent/     # 4 methodology knowledge files
+  knowledge/mabl-verification-quality-agent/     # 4 methodology knowledge files
     local-run-patterns.md
     authoring-best-practices.md
     failure-rca-methodology.md
@@ -174,7 +174,7 @@ sensors read. Artifacts land under the engine-resolved record dir for the stage.
 Project-specific configuration (workspace IDs, application IDs, credential
 mappings, environment URLs) belongs in team knowledge at:
 ```
-aidlc/spaces/<active-space>/knowledge/mabl-verification-agent/workspace-constants.md
+aidlc/spaces/<active-space>/knowledge/mabl-verification-quality-agent/workspace-constants.md
 ```
 
 This file is NOT shipped by the plugin — teams create it during onboarding.
@@ -223,7 +223,7 @@ mabl config set workspace-id <your-workspace-id>
 ```
 
 Or provide in team knowledge at
-`aidlc/spaces/<space>/knowledge/mabl-verification-agent/workspace-constants.md`.
+`aidlc/spaces/<space>/knowledge/mabl-verification-quality-agent/workspace-constants.md`.
 
 ## See also
 

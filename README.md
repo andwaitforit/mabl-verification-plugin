@@ -35,32 +35,41 @@ install, so no prose or skill file needs editing.
 
 ## Developing
 
-The framework's validator, compose fixture, and packager live in the
-aidlc-workflows repository, so tests need a checkout of it:
+The framework ships an authoring toolchain (validate / build / test) inside its
+distribution, so this repository works against a **pinned, copied
+distribution** — no aidlc-workflows checkout is involved anywhere in the loop.
 
 ```bash
-git clone https://github.com/awslabs/aidlc-workflows.git
-git -C aidlc-workflows checkout 572dda2863437d578b9d9bc2ea171a2e3955f91f  # v2 @ 2.6.80
-export AIDLC_WORKFLOWS_ROOT="$PWD/aidlc-workflows"
-
 bun install
+bun run sync        # copies the pinned AIDLC distribution into .aidlc/ (gitignored)
 bun run check       # typecheck + tests + projection drift
 ```
 
-Regenerate the host projections after changing anything under
-`mabl-verification/`:
+`bun run build` regenerates the host projections after any change under
+`mabl-verification/`. `bun scripts/build-projections.ts --check` byte-compares
+freshly built projections against the committed `dist/`, and CI fails on drift,
+so a stale `dist/` cannot reach main.
 
-```bash
-bun run build
-```
+### Pinned AIDLC version
 
-`bun scripts/build-projections.ts --check` byte-compares freshly built
-projections against the committed `dist/`, and CI fails on drift — a stale
-`dist/` cannot reach main.
+`scripts/aidlc-pin.ts` is the single source of truth:
 
-A checkout placed beside this repository is discovered automatically;
-`AIDLC_WORKFLOWS_ROOT` overrides the search. See
-`mabl-verification/tests/harness.ts`.
+| | |
+|---|---|
+| Version | 2.6.105 |
+| Commit | `3b5a1359fabef00de04ef05a58ed2835857a26cb` |
+
+Bump both fields together, run `bun run sync --force`, then `bun run check`.
+The validate and compose tiers run against exactly that distribution, so a
+framework change that breaks this plugin surfaces as a test failure rather than
+a user report.
+
+### The compose hook
+
+`mabl-verification/hooks/compose.ts` is deliberately **absent**. The build
+injects the framework's bundled template, which means this plugin cannot drift
+from it. The `compose-hook-absent` warning is expected and asserted in the test
+suite. Vendor the file only to intentionally pin a modified hook.
 
 ## Status
 

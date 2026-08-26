@@ -1,105 +1,93 @@
 /**
- * Real composition tests: build the actual host projection, install it into a
- * scratch project, run the emitted compose hook, and inspect the compiled stage
- * graph and scope grid.
+ * Contract-tier tests: run the framework's own shipped validate and test tools
+ * against this plugin, from the pinned distribution in .aidlc/.
  *
- * This is the check that content validation cannot make. A stage with an invalid
- * execution contract passes a schema read but is dropped as degraded at compose
- * time, which is how this plugin previously shipped without a ship gate.
+ * The test tool composes the built projection into a disposable copy of a real
+ * install, runs the real compose hook, and never mutates the source install.
+ * This is the check content validation cannot make: a stage with an invalid
+ * execution contract reads fine but is dropped as degraded at compose time,
+ * which is how this plugin once shipped without a ship gate.
  */
 
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { describe, expect, test } from "bun:test";
 
-import { PLUGIN_NAME, PLUGIN_ROOT, aidlcWorkflowsRoot, loadPluginKit } from "./harness.ts";
+import {
+  AIDLC_VERSION,
+  PLUGIN_NAME,
+  PLUGIN_ROOT,
+  type ToolReport,
+  runTool,
+} from "./harness.ts";
+import { INSTALL_DIR } from "../../scripts/aidlc-pin.ts";
 
-const kit = await loadPluginKit();
-const composePluginFixture = kit.composePluginFixture as (opts: {
-  plugin: string;
-  harness: string;
-}) => { projectDir: string; dropLogs: string };
+const EXPECTED_STAGES = [
+  "mabl-verification-coverage-gap",
+  "mabl-verification-pre-pr",
+  "mabl-verification-ship-gate",
+];
 
-const workflowsRoot = aidlcWorkflowsRoot();
-const staged = join(workflowsRoot, "plugins", PLUGIN_NAME);
-const stagedByUs = !existsSync(staged);
+describe(`validate tier (AIDLC ${AIDLC_VERSION})`, () => {
+  const report: ToolReport = runTool("validate", [PLUGIN_ROOT]);
 
-beforeAll(() => {
-  if (stagedByUs) cpSync(PLUGIN_ROOT, staged, { recursive: true });
-});
-
-afterAll(() => {
-  if (stagedByUs) rmSync(staged, { recursive: true, force: true });
-});
-
-describe("composition", () => {
-  let projectDir = "";
-  let dropLogs = "";
-
-  beforeAll(() => {
-    const fixture = composePluginFixture({ plugin: PLUGIN_NAME, harness: "claude" });
-    projectDir = fixture.projectDir;
-    dropLogs = fixture.dropLogs;
+  test("the plugin is valid with no errors", () => {
+    expect(report.errors).toEqual([]);
+    expect(report.valid).toBe(true);
   });
 
-  interface StageNode {
-    slug: string;
-    execution: string;
-    condition?: string;
-    scopes?: string[];
-  }
+  test("the only warning is the deliberate absent compose hook", () => {
+    // Left absent on purpose: the build injects the bundled template, so the
+    // plugin cannot drift from it.
+    expect(report.warnings.map((w) => w.rule)).toEqual(["compose-hook-absent"]);
+  });
+});
 
-  // stage-graph.json is a flat array of stage nodes.
-  const graph = (): StageNode[] =>
-    JSON.parse(
-      readFileSync(join(projectDir, ".claude", "tools", "data", "stage-graph.json"), "utf-8"),
-    );
-  const stage = (slug: string): StageNode | undefined =>
-    graph().find((s) => s.slug === slug);
-  const grid = () =>
-    JSON.parse(
-      readFileSync(join(projectDir, ".claude", "tools", "data", "scope-grid.json"), "utf-8"),
-    );
+describe(`compose tier (AIDLC ${AIDLC_VERSION})`, () => {
+  const report: ToolReport = runTool("test", [
+    PLUGIN_ROOT,
+    "--install",
+    INSTALL_DIR,
+    "--harness",
+    "claude",
+  ]);
+  const graph = report.graph as {
+    compiled: boolean;
+    presentStages: string[];
+    missingStages: string[];
+    presentScopes?: string[];
+    missingScopes?: string[];
+  };
 
-  test("composes with no dropped surfaces", () => {
-    expect(dropLogs).not.toContain("degraded");
-    expect(dropLogs).not.toContain("is not owned by plugin");
+  test("composes cleanly with no dropped surfaces", () => {
+    expect(report.errors).toEqual([]);
+    expect(report.drops).toEqual([]);
+    expect(report.valid).toBe(true);
   });
 
-  test("all three plugin stages reach the compiled graph", () => {
-    const slugs = graph().map((s) => s.slug);
-    for (const slug of [
-      "mabl-verification-pre-pr",
-      "mabl-verification-coverage-gap",
-      "mabl-verification-ship-gate",
-    ]) {
-      expect(slugs).toContain(slug);
+  test("the graph compiles with all three plugin stages", () => {
+    expect(graph.compiled).toBe(true);
+    expect(graph.missingStages).toEqual([]);
+    for (const slug of EXPECTED_STAGES) {
+      expect(graph.presentStages).toContain(slug);
     }
   });
 
-  test("the ship gate survives composition with a real condition", () => {
-    const node = stage("mabl-verification-ship-gate");
-    expect(node).toBeDefined();
-    expect(node?.execution).toBe("CONDITIONAL");
-    expect(node?.condition ?? "").not.toBe("");
+  test("the ship gate survives composition", () => {
+    // The stage that was previously dropped as degraded.
+    expect(graph.presentStages).toContain("mabl-verification-ship-gate");
   });
 
-  test("core stages join the plugin scope through adds.scopes", () => {
-    const scope = grid()[`${PLUGIN_NAME}-validation`];
-    expect(scope).toBeDefined();
-    expect(scope.stages["code-generation"]).toBeDefined();
-    expect(scope.stages["build-and-test"]).toBeDefined();
+  test("the plugin scope reaches the compiled grid", () => {
+    expect(graph.missingScopes ?? []).toEqual([]);
+    expect(graph.presentScopes ?? []).toContain(`${PLUGIN_NAME}-validation`);
   });
 
-  test("the plugin scope routes all three plugin stages", () => {
-    const scope = grid()[`${PLUGIN_NAME}-validation`];
-    for (const slug of [
-      "mabl-verification-pre-pr",
-      "mabl-verification-coverage-gap",
-      "mabl-verification-ship-gate",
-    ]) {
-      expect(scope.stages[slug]).toBeDefined();
-    }
+  test("both core-stage contributions apply", () => {
+    const changed = (report.changedFiles ?? []) as string[];
+    expect(changed.some((f) => f.includes("build-and-test"))).toBe(true);
+    expect(changed.some((f) => f.includes("code-generation"))).toBe(true);
+  });
+
+  test("a second compose is idempotent", () => {
+    expect(report.idempotent).toBe(true);
   });
 });

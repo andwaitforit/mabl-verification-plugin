@@ -1,4 +1,5 @@
 node_modules/
+.aidlc/
 # dist/ holds the published host projections and is tracked on purpose.
 .aidlc-scratch/
 *.log

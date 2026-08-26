@@ -5,17 +5,33 @@ This project uses semantic versioning independently of aidlc-workflows.
 
 ## [Unreleased]
 
+### Changed
+- Authored against AIDLC **2.6.105** (`3b5a1359f`), up from 2.6.80. The
+  framework shipped a plugin authoring toolchain (validate/build/test) in its
+  distribution, so this repository now drives those shipped tools against a
+  pinned, copied distribution in `.aidlc/`. Removed the checkout resolver, the
+  staging of this plugin into a framework tree, and the CI clone of
+  aidlc-workflows — no framework checkout is in the loop anywhere.
+- Renamed the agent to `mabl-verification-quality-agent` to satisfy the
+  `agent-filename` rule added in 2.6.105, which requires
+  `<plugin>-<role>-agent.md`. The knowledge directory moved with it.
+- Projections now carry the emitter's `.aidlc-plugin-projection.json`
+  provenance file.
+
 ### Added
 - Host projections for all seven harnesses under
   `dist/plugins/mabl-verification/`, built by `scripts/build-projections.ts`,
   with a `--check` drift guard wired into CI.
 - Root `.claude-plugin/marketplace.json` so the repository can be added as a
   plugin marketplace.
-- GitHub Actions CI: typecheck, tests, and projection-drift check against a
-  pinned aidlc-workflows checkout.
-- Real composition tests (`tests/compose.test.ts`) that build the actual
-  projection, run the emitted compose hook, and assert all three stages reach
-  the compiled graph.
+- GitHub Actions CI: typecheck, tests, and projection-drift check against the
+  pinned AIDLC distribution.
+- `scripts/aidlc-pin.ts` as the single source of truth for the supported AIDLC
+  version, and `bun run sync` to fetch it.
+- Contract-tier tests (`tests/compose.test.ts`) that drive the framework's own
+  shipped validate and test tools: 0 drops, graph compiled, all three stages and
+  the plugin scope present, both contributions applied, and an idempotent second
+  compose.
 - An input contract on `mabl-verification-ship-gate` naming every mabl
   identifier kind the stage accepts, replacing bare `-jr`/`-pr`/`-j`/`-p`/`-v`
   shorthand carried over from the source skills.

@@ -6,7 +6,7 @@ plugin: mabl-verification
 phase: construction
 execution: CONDITIONAL
 condition: Execute after mabl-verification-pre-pr when the plugin is active and either (a) the pre-pr stage reported coverage_zero_match for any inferred flow, (b) the matched test count is below the inferred flow count, or (c) the user explicitly requests a coverage assessment.
-lead_agent: mabl-verification-agent
+lead_agent: mabl-verification-quality-agent
 support_agents: []
 mode: inline
 produces:
@@ -49,7 +49,7 @@ optionally author → emit coverage report.**
 
 ### Step 1: Load Agent Persona
 
-Load mabl-verification-agent persona from `agents/mabl-verification-agent.md` and knowledge from `{{HARNESS_DIR}}/knowledge/mabl-verification-agent/`.
+Load mabl-verification-quality-agent persona from `agents/mabl-verification-quality-agent.md` and knowledge from `{{HARNESS_DIR}}/knowledge/mabl-verification-quality-agent/`.
 
 ### Step 2: Load Upstream Impact
 

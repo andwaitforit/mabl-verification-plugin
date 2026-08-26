@@ -5,6 +5,7 @@
   "private": true,
   "description": "Dev-only tooling for the mabl-verification AIDLC plugin. The published artifact is the packaged projection, not this package.",
   "scripts": {
+    "sync": "bun scripts/sync-aidlc.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "build": "bun scripts/build-projections.ts",

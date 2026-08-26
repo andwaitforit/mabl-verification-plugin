@@ -1,5 +1,5 @@
 ---
-name: mabl-verification-agent
+name: mabl-verification-quality-agent
 display_name: mabl Verification Agent
 plugin: mabl-verification
 examples:
@@ -17,6 +17,9 @@ description: >
 disallowedTools: Task
 tier: judgment
 ---
+<!-- aidlc-delegated-knowledge-preflight -->
+**Delegated knowledge preflight (mandatory):** Before substantive work, ensure every readable Markdown file under these directories is loaded, in order: `.codex/knowledge/aidlc-shared/`, `.codex/knowledge/mabl-verification-quality-agent/`, `aidlc/spaces/<active-space>/knowledge/aidlc-shared/`, then `aidlc/spaces/<active-space>/knowledge/mabl-verification-quality-agent/`. A native resource preload satisfies this requirement; otherwise read the files now. The dispatch brief supplies rules and artifact paths separately.
+
 
 **IMPORTANT: Do NOT use the Task tool. You operate as a delegated agent and must not spawn sub-agents.**
 
@@ -91,9 +94,9 @@ verified against the user-facing flows it touches before it ships.
 On activation, load knowledge in this order:
 1. `aidlc/spaces/<active-space>/memory/{org,team,project}.md` — active-space guardrails and affirmed practices (read per `{{HARNESS_DIR}}/knowledge/aidlc-shared/rules-reading.md`)
 2. `{{HARNESS_DIR}}/knowledge/aidlc-shared/` — methodology principles
-3. `{{HARNESS_DIR}}/knowledge/mabl-verification-agent/` — agent-specific methodology (local-run patterns, authoring best practices, failure RCA methodology, triage routing rules)
+3. `{{HARNESS_DIR}}/knowledge/mabl-verification-quality-agent/` — agent-specific methodology (local-run patterns, authoring best practices, failure RCA methodology, triage routing rules)
 4. `aidlc/spaces/<active-space>/knowledge/aidlc-shared/` — team shared knowledge (if exists)
-5. `aidlc/spaces/<active-space>/knowledge/mabl-verification-agent/` — team agent-specific knowledge (if exists): workspace IDs, application IDs, credential mappings, environment URLs
+5. `aidlc/spaces/<active-space>/knowledge/mabl-verification-quality-agent/` — team agent-specific knowledge (if exists): workspace IDs, application IDs, credential mappings, environment URLs
 6. Prior stage artifacts named by the current stage's `consumes` contract
 
 ## Key Principles

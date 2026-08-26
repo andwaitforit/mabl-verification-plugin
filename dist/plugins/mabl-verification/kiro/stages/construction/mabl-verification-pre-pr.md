@@ -6,7 +6,7 @@ plugin: mabl-verification
 phase: construction
 execution: CONDITIONAL
 condition: Execute after build-and-test when the mabl plugin is active, the mabl CLI is authenticated, the mabl MCP server is connected, and the workspace has mabl tests covering the application under development.
-lead_agent: mabl-verification-agent
+lead_agent: mabl-verification-quality-agent
 support_agents: []
 mode: inline
 produces:
@@ -48,7 +48,7 @@ The flow: **diff → derive intent → match tests → run locally → triage �
 
 ### Step 1: Load Agent Persona
 
-Load mabl-verification-agent persona from `agents/mabl-verification-agent.md` and knowledge from `{{HARNESS_DIR}}/knowledge/mabl-verification-agent/`.
+Load mabl-verification-quality-agent persona from `agents/mabl-verification-quality-agent.md` and knowledge from `{{HARNESS_DIR}}/knowledge/mabl-verification-quality-agent/`.
 
 ### Step 2: Preflight Checks
 
@@ -65,7 +65,7 @@ Verify the mabl toolchain is ready before proceeding:
    If not connected, report the gap and halt.
 
 3. **Workspace resolution:** Resolve the target mabl workspace (from team knowledge
-   at `aidlc/spaces/<active-space>/knowledge/mabl-verification-agent/workspace-constants.md`,
+   at `aidlc/spaces/<active-space>/knowledge/mabl-verification-quality-agent/workspace-constants.md`,
    or `mabl config get workspace-id`, or by listing and asking). Record the workspaceId.
 
 4. **Git repository:** Confirm `git rev-parse --is-inside-work-tree`.
@@ -190,7 +190,7 @@ the diff from Step 3 to localize the cause. `env-data` and `mabl-flake` count as
 resolved only when a rerun actually passed — set `rerun_passed: true` when it did.
 
 If deeper analysis is needed, invoke the failure-RCA methodology from
-`{{HARNESS_DIR}}/knowledge/mabl-verification-agent/failure-rca-methodology.md`:
+`{{HARNESS_DIR}}/knowledge/mabl-verification-quality-agent/failure-rca-methodology.md`:
 pull AI analysis (`analyze_mabl_failure`), retrieve artifacts (DOM, HAR, console),
 and correlate with source.
 

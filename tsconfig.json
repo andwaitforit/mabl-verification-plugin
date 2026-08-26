@@ -13,6 +13,10 @@
   },
   "include": [
     "mabl-verification/tools/**/*.ts",
-    "mabl-verification/tests/**/*.ts"
+    "mabl-verification/tests/**/*.ts",
+    "scripts/**/*.ts"
+  ],
+  "exclude": [
+    ".aidlc"
   ]
 }
