@@ -46,6 +46,13 @@ Each release records the AIDLC version it was validated against.
 - Dispatcher-shaped sensor behavior tests and framework-validator content tests.
 
 ### Fixed
+- Setup documentation, rewritten against mabl's current published docs. The
+  MCP section described a local stdio server installed from a nonexistent
+  `@anthropic-ai/mabl-mcp-server` npm package; the integration is the hosted
+  mabl cloud MCP at `https://mcp.mabl.com/mcp`. Also corrects the Node floor
+  (22+, not 18+), the authentication command, the project-level Claude Code
+  config location, and the install instructions, which still told readers to
+  build from an aidlc-workflows checkout.
 - `mabl-verification-ship-gate` declared `execution: EXECUTE` with no
   `condition`, so composition dropped it as degraded and no ship gate existed.
 - Both sensors treated `--output-path` as a directory when the dispatcher passes

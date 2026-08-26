@@ -28,47 +28,53 @@ against the user-facing flows it touches via mabl's AI testing platform. It:
 
 ### Prerequisites
 
-- **mabl CLI** (Node 18+): `npm install -g @mablhq/mabl-cli`
-- **mabl CLI authenticated**: `mabl auth login` or `mabl auth activate-key <key>`
-- **mabl MCP server** connected to your harness (provides `search_mabl_tests`,
-  `analyze_mabl_failure`, `check_release_readiness`, etc.)
-- **bun** on PATH (required by all AIDLC plugins for hooks and tools)
-- **A running local dev server** for test execution
-- **At least one mabl test** in the workspace covering the application
+- **Node.js 22 or higher** — the mabl CLI requires an actively supported LTS
+  release. Check with `node -v`. Running the CLI under WSL is not supported.
+- **mabl CLI**: `npm install -g @mablhq/mabl-cli`, then confirm with
+  `mabl --version`.
+- **mabl CLI authenticated**: `mabl auth login --auto`, then confirm with
+  `mabl auth info`.
+- **mabl cloud MCP server** connected to your harness — see
+  [MCP server setup](#mcp-server-setup). Provides `search_mabl_tests`,
+  `analyze_mabl_failure`, `check_release_readiness`, and the rest of the tools
+  the stages call.
+- **bun** on PATH (required by all AIDLC plugins for hooks and tools).
+- **A running local dev server** for test execution.
+- **At least one mabl test** in the workspace covering the application.
 
 ### Installation
 
-Build the plugin projections (from the aidlc-workflows repo root):
-
-```bash
-bun scripts/package.ts          # emits dist/plugins/mabl-verification/<harness>/
-```
-
-Then install per harness:
-
-**Kiro IDE / Kiro CLI** (folder-drop + compose):
-```bash
-cp -r dist/plugins/mabl-verification/kiro-ide/. <project>/
-AIDLC_PLUGIN_ROOT="$(pwd)/dist/plugins/mabl-verification/kiro-ide" \
-  AIDLC_PROJECT_DIR="<project>" AIDLC_HARNESS_DIR=.kiro \
-  bun dist/plugins/mabl-verification/kiro-ide/hooks/compose.ts
-```
+The published projections live in this repository under
+`dist/plugins/mabl-verification/<harness>/`. Building from source is only needed
+when developing the plugin — see the [repository README](../README.md).
 
 **Claude Code** (host store):
 ```bash
-/plugin marketplace add <repo-or-path>/dist/plugins/mabl-verification/claude
-/plugin install aidlc-mabl-verification@aidlc-plugins
+/plugin marketplace add andwaitforit/mabl-verification-plugin
+/plugin install aidlc-mabl-verification@mabl-plugins
 ```
 
 **Codex CLI** (host store, in a git repo):
 ```bash
-codex plugin marketplace add <…>/dist/plugins/mabl-verification/codex
-codex plugin add aidlc-mabl-verification@aidlc-plugins
+codex plugin marketplace add andwaitforit/mabl-verification-plugin
+codex plugin add aidlc-mabl-verification@mabl-plugins
 ```
+
+**Kiro IDE / Kiro CLI** (no store — folder-drop, then compose explicitly):
+```bash
+git clone https://github.com/andwaitforit/mabl-verification-plugin.git
+cp -r mabl-verification-plugin/dist/plugins/mabl-verification/kiro-ide/. <project>/
+AIDLC_PLUGIN_ROOT="$PWD/mabl-verification-plugin/dist/plugins/mabl-verification/kiro-ide" \
+  AIDLC_PROJECT_DIR="<project>" AIDLC_HARNESS_DIR=.kiro \
+  bun <project>/hooks/compose.ts
+```
+
+For the store-based harnesses a bundled SessionStart hook composes the plugin
+automatically; no prose or skill file needs editing.
 
 Then verify:
 ```bash
-/aidlc --doctor    # expect 36 stages, Plugin check (mabl-verification): rows, 0 failures
+/aidlc --doctor    # expect a "Plugin check (mabl-verification)" section with 0 failures
 /aidlc --scope enterprise   # the mabl-verification stages route under enterprise/feature/mvp/classic
 ```
 
@@ -195,25 +201,78 @@ agents/scopes (naming, frontmatter), knowledge (exists, non-empty), and tools
 
 ### MCP server setup
 
-The mabl MCP server must be connected to the harness. There is no
-`mabl agent install kiro` target — add the entry by hand:
+The plugin's stages call mabl through the **mabl cloud MCP server** — a hosted
+HTTP endpoint at `https://mcp.mabl.com/mcp`. There is no local stdio package to
+install.
+
+Two authentication methods:
+
+- **OAuth** — connects to your mabl user account and can reach any workspace that
+  user belongs to. Start here if unsure; you will re-authenticate periodically.
+- **API key** — scoped to the single workspace the key was generated in, and
+  persists until the key expires. Better for agent-to-agent and CI use.
+
+**Claude Code** (registers for the current project; add `--scope user` for all
+projects):
+
+```bash
+claude mcp add --transport http mabl https://mcp.mabl.com/mcp
+claude mcp list          # confirm
+```
+
+With an API key instead of OAuth:
+
+```bash
+claude mcp add --transport http mabl https://mcp.mabl.com/mcp \
+  --header "x-api-key: $MABL_API_KEY"
+```
+
+**Clients using JSON config** (Kiro `.kiro/settings/mcp.json`, Claude Code
+project config `.mcp.json`, and equivalents):
 
 ```json
 {
   "mcpServers": {
     "mabl": {
-      "command": "npx",
-      "args": ["-y", "@anthropic-ai/mabl-mcp-server@latest"],
-      "env": {
-        "MABL_API_KEY": "<your-api-key>"
-      }
+      "url": "https://mcp.mabl.com/mcp",
+      "type": "http"
     }
   }
 }
 ```
 
-Place in `.kiro/settings/mcp.json` (Kiro), `.claude/settings.json` (Claude Code),
-or the equivalent for your harness.
+Add a `headers` object for API-key auth:
+
+```json
+{
+  "mcpServers": {
+    "mabl": {
+      "url": "https://mcp.mabl.com/mcp",
+      "type": "http",
+      "headers": { "x-api-key": "${MABL_API_KEY}" }
+    }
+  }
+}
+```
+
+Reference the key from an environment variable, as above, whenever the config
+file is committed or shared. Never paste a key into a tracked file.
+
+**Client differences:**
+
+| Client | Difference |
+|---|---|
+| Cursor, Windsurf | use `"type": "streamable-http"` |
+| Legacy dual-endpoint clients | use `"type": "sse"` with `https://mcp.mabl.com/sse` |
+| Gemini CLI | `gemini extensions install https://github.com/mablhq/mabl-mcp-server` |
+| Claude Desktop | add as a custom connector: Settings → Connectors → Add custom connector |
+
+After adding the server, complete the browser consent flow. If your client does
+not prompt, ask it to "Help me authenticate the mabl MCP".
+
+Authoritative source: [Set up the cloud MCP
+server](https://help.mabl.com/hc/en-us/articles/47299404357780-Set-up-the-cloud-MCP-server).
+Follow that article if it diverges from this summary.
 
 ### Workspace ID
 
