@@ -27,19 +27,6 @@ Please include:
 Do not include live credentials, API keys, or customer data in a report. A
 redacted reproduction is always preferred.
 
-## What to expect
-
-| | |
-|---|---|
-| Acknowledgement | within 3 business days |
-| Initial assessment | within 10 business days |
-| Fix or mitigation plan | communicated with the assessment |
-
-We will keep you updated as the fix progresses, credit you in the advisory
-unless you prefer otherwise, and coordinate disclosure timing with you. Fixes
-ship as a patch release with a `CHANGELOG.md` entry and a published GitHub
-advisory.
-
 ## Scope
 
 **In scope** — anything in this repository:
