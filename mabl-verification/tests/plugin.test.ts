@@ -14,6 +14,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { FAILURE_CLASSES } from "../tools/mabl-verification-contract.ts";
+import { parseWorkspaceConfig } from "../tools/mabl-verification-doctor.ts";
 import { PLUGIN_NAME, PLUGIN_ROOT } from "./harness.ts";
 
 const RUN_STATUS = join(PLUGIN_ROOT, "tools", "aidlc-sensor-mabl-run-status.ts");
@@ -352,5 +353,49 @@ describe("release metadata", () => {
     const released = changelog.includes(`## [${version}]`);
     const staged = changelog.includes("## [Unreleased]");
     expect(released || staged).toBe(true);
+  });
+});
+
+describe("doctor workspace detection", () => {
+  // `mabl config get workspace` renders a table. The key is `workspace`; a
+  // `workspace-id` lookup is rejected by the CLI, which prints usage text.
+  const table = (value: string, details: string) =>
+    [
+      "┌───────────┬──────────────────────────┬────────────────────┐",
+      "│ Config    │ Value                    │ Details            │",
+      "├───────────┼──────────────────────────┼────────────────────┤",
+      `│ workspace │ ${value} │ ${details} │`,
+      "└───────────┴──────────────────────────┴────────────────────┘",
+    ].join("\n");
+
+  test("reads the id and the human-readable name", () => {
+    expect(parseWorkspaceConfig(table("yd5Pqz48bEMhiY2xlCeMuA-w", "Demo-Workspace"))).toEqual({
+      id: "yd5Pqz48bEMhiY2xlCeMuA-w",
+      name: "Demo-Workspace",
+    });
+  });
+
+  test("strips ANSI colour before parsing", () => {
+    const coloured = table("yd5Pqz48bEMhiY2xlCeMuA-w", "Demo-Workspace")
+      .replace("workspace", "\u001b[90mworkspace\u001b[39m");
+    expect(parseWorkspaceConfig(coloured).id).toBe("yd5Pqz48bEMhiY2xlCeMuA-w");
+  });
+
+  test("falls back to the id when no name is set", () => {
+    const parsed = parseWorkspaceConfig(table("yd5Pqz48bEMhiY2xlCeMuA-w", "---"));
+    expect(parsed).toEqual({ id: "yd5Pqz48bEMhiY2xlCeMuA-w", name: "" });
+  });
+
+  test("treats an unset workspace as not configured", () => {
+    expect(parseWorkspaceConfig(table("---", "---")).id).toBe("");
+  });
+
+  test("treats CLI usage text as not configured", () => {
+    // What the CLI prints for an invalid key such as `workspace-id`.
+    expect(parseWorkspaceConfig("mabl config get <config-key>\n\nGet a config value").id).toBe("");
+  });
+
+  test("treats empty output as not configured", () => {
+    expect(parseWorkspaceConfig("").id).toBe("");
   });
 });

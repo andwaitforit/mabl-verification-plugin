@@ -66,7 +66,7 @@ Verify the mabl toolchain is ready before proceeding:
 
 3. **Workspace resolution:** Resolve the target mabl workspace (from team knowledge
    at `aidlc/spaces/<active-space>/knowledge/mabl-verification-quality-agent/workspace-constants.md`,
-   or `mabl config get workspace-id`, or by listing and asking). Record the workspaceId.
+   or `mabl config get workspace`, or by listing and asking). Record the workspaceId.
 
 4. **Git repository:** Confirm `git rev-parse --is-inside-work-tree`.
 

@@ -83,32 +83,52 @@ function checkCliAuthenticated(): Check {
   }
 }
 
+/** Parse `mabl config get workspace` output. The CLI key is `workspace`, not
+ *  `workspace-id`, and it renders a table — so read the `workspace` row's Value
+ *  cell (and the Details cell, which carries the human-readable name). Anything
+ *  unexpected — usage text, an unset `---`, empty — yields an empty id, so the
+ *  caller reports not-configured. */
+export function parseWorkspaceConfig(raw: string): { id: string; name: string } {
+  const row = raw
+    .replace(/\x1b\[[0-9;]*m/g, "")
+    .split("\n")
+    .map((line) => line.split("│").map((cell) => cell.trim()))
+    .find((cells) => cells[1] === "workspace");
+
+  const id = row?.[2] ?? "";
+  const name = row?.[3] && row[3] !== "---" ? row[3] : "";
+  if (!id || id === "---" || id.includes("undefined")) return { id: "", name: "" };
+  return { id, name };
+}
+
 function checkWorkspaceConfigured(): Check {
   try {
-    const wsId = execSync("mabl config get workspace-id 2>&1", {
+    const raw = execSync("mabl config get workspace 2>&1", {
       timeout: 5000,
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
+    });
 
-    if (!wsId || wsId.includes("not set") || wsId.includes("undefined")) {
+    const { id: wsId, name: wsName } = parseWorkspaceConfig(raw);
+
+    if (!wsId) {
       return {
         pass: false,
-        label: "mabl workspace-id not configured",
-        fix: "Run: mabl config set workspace-id <your-workspace-id>",
+        label: "mabl workspace not configured",
+        fix: "Run: mabl config set workspace <your-workspace-id>",
         severity: "advisory",
       };
     }
 
     return {
       pass: true,
-      label: `mabl workspace configured (${wsId.substring(0, 12)}...)`,
+      label: `mabl workspace configured (${wsName || wsId})`,
     };
   } catch {
     return {
       pass: false,
-      label: "mabl workspace-id not configured",
-      fix: "Run: mabl config set workspace-id <your-workspace-id> (or provide via team knowledge)",
+      label: "mabl workspace not configured",
+      fix: "Run: mabl config set workspace <your-workspace-id> (or provide via team knowledge)",
       severity: "advisory",
     };
   }
@@ -209,4 +229,4 @@ function main(): void {
   console.log(JSON.stringify({ checks }));
 }
 
-main();
+if (import.meta.main) main();
