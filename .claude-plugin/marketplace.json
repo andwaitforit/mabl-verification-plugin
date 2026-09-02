@@ -9,7 +9,7 @@
       "name": "aidlc-mabl-verification",
       "description": "End-to-end mabl verification loop \u2014 pre-PR test matching and local execution, failure RCA, coverage gap analysis, triage routing, and ship gating.",
       "source": "./dist/plugins/mabl-verification/claude",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ]
 }

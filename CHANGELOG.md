@@ -4,6 +4,29 @@ All notable changes to the mabl-verification plugin are documented here.
 This project uses semantic versioning independently of aidlc-workflows.
 Each release records the AIDLC version it was validated against.
 
+## [0.1.1] - 2026-09-02
+
+### Fixed
+- The doctor's workspace check read a config key the mabl CLI does not have.
+  `mabl config get workspace-id` is rejected by the CLI, which prints usage
+  text, so the check reported `mabl workspace-id not configured` on every
+  machine — including correctly configured ones — and the fix it suggested
+  (`mabl config set workspace-id ...`) could not clear it. The key is
+  `workspace`. Corrected in the doctor, the plugin README, and the workspace
+  resolution step of the `mabl-verification-pre-pr` stage.
+- `mabl config get` renders a table rather than a bare value, so the doctor
+  parsed the id out of the previous implementation's raw output only by
+  accident of it being empty. Workspace parsing is now an exported
+  `parseWorkspaceConfig` covered by tests, and the check labels itself with the
+  workspace name from the table's Details cell — `mabl workspace configured
+  (Demo-Workspace)`. Unexpected output (usage text, an unset `---`, empty)
+  still reports not-configured, so the check fails closed.
+
+### Changed
+- The doctor's `main()` is guarded by `import.meta.main` so the module can be
+  imported by tests without shelling out to the mabl CLI. Invoking the file as
+  a script is unaffected.
+
 ## [0.1.0] - 2026-08-26
 
 ### Changed

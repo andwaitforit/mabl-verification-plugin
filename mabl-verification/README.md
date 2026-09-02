@@ -278,7 +278,7 @@ Follow that article if it diverges from this summary.
 
 Set once so future runs are zero-prompt:
 ```bash
-mabl config set workspace-id <your-workspace-id>
+mabl config set workspace <your-workspace-id>
 ```
 
 Or provide in team knowledge at
